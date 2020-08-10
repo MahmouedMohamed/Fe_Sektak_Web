@@ -69,6 +69,15 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
+         config([
+        'MAIL_USERNAME' => 'khairtoss2212@gmail.com',
+        'MAIL_PASSWORD' =>'toto2212',
+        'MAIL_HOST' =>'smtp.gmail.com',
+        'MAIL_PORT' =>'587',
+        'MAIL_ENCRYPTION' =>'tls',
+        'MAIL_MAILER' =>'smtp',
+        'MAIL_FROM_ADDRESS'=>'khairtoss2212@gmail.com'
+    ]);
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],

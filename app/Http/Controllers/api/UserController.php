@@ -71,6 +71,15 @@ class UserController extends Controller
             'color' => ['required','string',],
             'userLicense' => ['required','min:8','unique:cars','regex:/^[0-9]{8}$/'],
         ];
+		 config([
+        'MAIL_USERNAME' => 'khairtoss2212@gmail.com',
+        'MAIL_PASSWORD' =>'toto2212',
+        'MAIL_HOST' =>'smtp.gmail.com',
+        'MAIL_PORT' =>'587',
+        'MAIL_ENCRYPTION' =>'tls',
+        'MAIL_MAILER' =>'smtp',
+        'MAIL_FROM_ADDRESS'=>'khairtoss2212@gmail.com'
+    ]);
         $validator = Validator::make($data, $rules);
         if ($validator->passes()) {
             $user = new User;
