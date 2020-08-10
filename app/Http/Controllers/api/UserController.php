@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\api;
 use App\Events\LocationsSent;
 use App\Http\Controllers\Controller;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Auth;
 use App\User;
 use App\Car;
@@ -35,12 +36,17 @@ class UserController extends Controller
     {
         if (Auth::attempt(['email' => request('email'), 'password' => request('password')])) {
             $user = Auth::user();
-            $this->content['user'] = $user;
-	    $profile = $user->profile;
- 	    $profile->picture = url()->previous().'\/\/\/\/storage\/\/\/\/'.$profile->picture;
-            $this->content['user']['profile'] = $profile;
-            $this->content['user']['car'] = $user->car;
-            return response()->json($this->content);
+            if($user->hasVerifiedEmail()){
+                $this->content['user'] = $user;
+                $profile = $user->profile;
+                $profile->picture = url()->previous().'\/\/\/\/storage\/\/\/\/'.$profile->picture;
+                $this->content['user']['profile'] = $profile;
+                $this->content['user']['car'] = $user->car;
+                return response()->json($this->content);
+            }else{
+                $this->content['error'] = "Please Verify Your Mail";
+                return response()->json($this->content);
+            }
         } else {
             $this->content['error'] = "Unauthorized";
             return response()->json($this->content);
@@ -71,15 +77,6 @@ class UserController extends Controller
             'color' => ['required','string',],
             'userLicense' => ['required','min:8','unique:cars','regex:/^[0-9]{8}$/'],
         ];
-		 config([
-        'MAIL_USERNAME' => 'khairtoss2212@gmail.com',
-        'MAIL_PASSWORD' =>'toto2212',
-        'MAIL_HOST' =>'smtp.gmail.com',
-        'MAIL_PORT' =>'587',
-        'MAIL_ENCRYPTION' =>'tls',
-        'MAIL_MAILER' =>'smtp',
-        'MAIL_FROM_ADDRESS'=>'khairtoss2212@gmail.com'
-    ]);
         $validator = Validator::make($data, $rules);
         if ($validator->passes()) {
             $user = new User;
@@ -98,6 +95,7 @@ class UserController extends Controller
                     $car->color = request('car')['color'];
                     $car->userLicense = request('car')['userLicense'];
                     $user->save();
+                    $user->sendEmailVerificationNotification();
                     $car->user_id = $user->id;
                     $car->save();
                     $profile = Profile::create([
@@ -113,6 +111,7 @@ class UserController extends Controller
                 }
             }
             $user->save();
+            $user->sendEmailVerificationNotification();
             $profile = Profile::create([
                 'user_id' => $user->id,
             ]);

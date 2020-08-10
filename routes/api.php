@@ -12,7 +12,11 @@ Route::group(['namespace' => 'api'], function () {
     Route::get('/login', 'UserController@login');
 });
 
+
 Route::group(['namespace' => 'api'], function () {
+    Route::get('email/verify/{id}', 'VerificationController@verify')->name('verification.verify'); // Make sure to keep this as your route name
+    Route::get('email/resend', 'VerificationController@resend')->name('verification.resend');
+
     Route::post('/register', 'UserController@register');
     Route::get('/notifications', 'NotificationController@showNotifications');
     Route::get('/getUnReadNotificationsCount', 'NotificationController@getUnReadNotificationsCount');
